@@ -1,5 +1,3 @@
-Here’s a detailed **README** for your GitHub repository based on the full architecture we’ve outlined:
-
 ---
 
 # **Hotel Management System (PMS + CRM + TRM + Smart TV Interface)**
