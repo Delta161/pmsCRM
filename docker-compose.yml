@@ -1,0 +1,90 @@
+version: '3.8'
+
+services:
+  crm:
+    build: ./crm
+    container_name: crm_service
+    restart: always
+    depends_on:
+      - database
+    environment:
+      DATABASE_URL: postgresql://admin:password@database:5432/hotel_crm
+    ports:
+      - "8000:8000"
+    networks:
+      - hotel_network
+    volumes:
+      - ./crm:/app
+    command: ["sh", "-c", "npm install && npm run start:dev"]
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  pms:
+    build: ./pms
+    container_name: pms_service
+    restart: always
+    depends_on:
+      - database
+    environment:
+      DATABASE_URL: postgresql://admin:password@database:5432/hotel_pms
+    ports:
+      - "8001:8000"
+    networks:
+      - hotel_network
+    volumes:
+      - ./pms:/app
+    command: ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port 8000 --reload"]
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  database:
+    image: postgres:15
+    container_name: hotel_database
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: hotel_crm
+    ports:
+      - "5432:5432"
+    networks:
+      - hotel_network
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@hotel.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    networks:
+      - hotel_network
+    depends_on:
+      - database
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  hotel_network:
+    driver: bridge
+
+volumes:
+  db_data:
